@@ -1,10 +1,21 @@
-import Register from "./components/Register"
+
+import axios from "axios"
+import { UserContextProvider } from "./UserContext"
+import Routes from "./Routes"
 
 function App() {
+  axios.defaults.baseURL = 'http://localhost:3000'
+  axios.defaults.withCredentials = true
+
+  // const {username} = useContext(UserContext)
+  // console.log(username)
 
   return (
     <>
-      <Register/>
+      <UserContextProvider>
+        {/* <Register/> */}
+        <Routes/>
+      </UserContextProvider>
     </>
   )
 }
