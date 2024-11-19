@@ -16,6 +16,7 @@ function RegisterAndLoginForm() {
         
         //have different urls based on if the user has an account or not
         const url = isloginOrRegister === 'register' ? 'register' : 'login';
+        
         const {data} = await axios.post(url, {username, password})
         setLoggedInUsername(username)
         setId(data.id)

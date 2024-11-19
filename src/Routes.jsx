@@ -1,5 +1,5 @@
 import { useContext } from "react"
-import Register from "./components/RegisterAndLoginForm"
+import RegisterAndLoginForm from "./components/RegisterAndLoginForm"
 import { UserContext } from "./UserContext"
 
 function Routes() {
@@ -9,7 +9,7 @@ function Routes() {
         return 'Welcome ' + username;
     }
   return (
-    <Register/>
+    <RegisterAndLoginForm/>
   )
 }
 
