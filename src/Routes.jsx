@@ -1,5 +1,5 @@
 import { useContext } from "react"
-import Register from "./components/Register"
+import Register from "./components/RegisterAndLoginForm"
 import { UserContext } from "./UserContext"
 
 function Routes() {
