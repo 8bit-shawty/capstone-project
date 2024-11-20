@@ -6,6 +6,7 @@ import Avatar from "./Avatar.jsx"
 function Chat() {
     const [ws, setWs] = useState(null)
     const [onlineUsers, setOnlineUsers] = useState({})
+    const [selectedUserId, setSelectedUserId] = useState(null)
     useEffect(() => {
         const ws = new WebSocket('ws://localhost:3000')
         setWs(ws)
@@ -41,18 +42,26 @@ function Chat() {
         }
     }
 
+    // create this function inline
+    // function selectContact(userId){
+    //     setSelectedUserId(userId)
+    // }
+
   return (
     <div className="flex h-screen">
-        <div className="bg-white w-1/3 pl-4 pt-4">
-        <div className="text-gray-800 font-bold mb-4">
+        <div className="bg-white w-1/3">
+        <div className="text-gray-800 font-extrabold text-4xl mb-4">
             propr.
         </div>
             {Object.keys(onlineUsers).map((userId, index) => (
-                <div key={index} className="border-b border-gray-300 py-2 flex items-center gap-2">
+                <div key={index} 
+                onClick={() => setSelectedUserId(userId)}
+                className={`border-b border-gray-300 py-2 flex items-center gap-2 cursor-pointer ` + (userId === selectedUserId ? 'bg-gray-300' : '')}
+                >
                     {/* map through each users username */}
                     {/* {userId} */}
                     <Avatar username={onlineUsers[userId]}  userId={userId}/>
-                    <span>{onlineUsers[userId]}</span>
+                    <span className="text-gray-800 font-medium">{onlineUsers[userId]}</span>
                 </div>
             ))}
         </div>

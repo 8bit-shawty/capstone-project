@@ -23,7 +23,7 @@ function Avatar({username, userId}) {
     const userColor = colors[getColorIndex(userId)]
 
   return (
-    <div className={`w-10 h-10 ${userColor} rounded-full flex items-center`}>
+    <div className={`w-10 h-10 ${userColor} rounded-full flex items-center opacity-80`}>
         <div className="text-center w-full">
             {username[0]}
         </div>
