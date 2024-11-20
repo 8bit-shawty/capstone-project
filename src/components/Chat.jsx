@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import Avatar from "./Avatar.jsx"
+import Logo from "./Logo.jsx"
+import {UserContext} from '../UserContext.jsx'
 
 
 
@@ -7,6 +9,8 @@ function Chat() {
     const [ws, setWs] = useState(null)
     const [onlineUsers, setOnlineUsers] = useState({})
     const [selectedUserId, setSelectedUserId] = useState(null)
+    const {id, username} = useContext(UserContext)
+
     useEffect(() => {
         const ws = new WebSocket('ws://localhost:3000')
         setWs(ws)
@@ -47,27 +51,43 @@ function Chat() {
     //     setSelectedUserId(userId)
     // }
 
+    //onlineUsers is not an array
+    // const onlineUsersExcludingUs = onlineUsers.filter(user => user.username !=== username )
+    const onlineUsersExcludingUs = {...onlineUsers}
+    delete onlineUsersExcludingUs[id]
+
   return (
     <div className="flex h-screen">
         <div className="bg-white w-1/3">
-        <div className="text-gray-800 font-extrabold text-4xl mb-4">
-            propr.
-        </div>
-            {Object.keys(onlineUsers).map((userId, index) => (
+            <Logo/>
+            {/* {username} we have our context now we do not want to display ourselves in the users list*/} 
+            {Object.keys(onlineUsersExcludingUs).map((userId, index) => (
+                //might need to adjust the key to userId
                 <div key={index} 
                 onClick={() => setSelectedUserId(userId)}
-                className={`border-b border-gray-300 py-2 flex items-center gap-2 cursor-pointer ` + (userId === selectedUserId ? 'bg-gray-300' : '')}
+                className={`border-b border-gray-300 flex items-center gap-1 cursor-pointer ` + (userId === selectedUserId ? 'bg-gray-300' : '')}
                 >
-                    {/* map through each users username */}
-                    {/* {userId} */}
-                    <Avatar username={onlineUsers[userId]}  userId={userId}/>
-                    <span className="text-gray-800 font-medium">{onlineUsers[userId]}</span>
+                    {userId === selectedUserId && (
+                        <div className="w-1 bg-blue-600 h-12"></div>
+                    )}
+                    <div className="flex gap-2 pl-4 py-2 items-center">
+                        {/* map through each users username */}
+                        {/* {userId} */}
+                        <Avatar username={onlineUsers[userId]}  userId={userId}/>
+                        <span className="text-gray-800 font-medium">{onlineUsers[userId]}</span>
+                    </div>
                 </div>
             ))}
         </div>
         <div className="flex flex-col bg-blue-400 w-2/3 p-3">
             <div className="flex-grow">
-                messages with selected person
+                {!selectedUserId && (
+                    <div className="flex h-full items-center justify-center">
+                        <div className="text-gray-700">
+                            No Selected Person..
+                        </div>
+                    </div>
+                )}
             </div>
             <div className="flex gap-2">
                 <input 
