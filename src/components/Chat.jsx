@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import Avatar from "./Avatar.jsx"
 
 
 
@@ -42,12 +43,16 @@ function Chat() {
 
   return (
     <div className="flex h-screen">
-        <div className="bg-white w-1/3">
+        <div className="bg-white w-1/3 pl-4 pt-4">
+        <div className="text-gray-800 font-bold mb-4">
+            propr.
+        </div>
             {Object.keys(onlineUsers).map((userId, index) => (
-                <div key={index}>
+                <div key={index} className="border-b border-gray-300 py-2 flex items-center gap-2">
                     {/* map through each users username */}
                     {/* {userId} */}
-                    {onlineUsers[userId]}
+                    <Avatar username={onlineUsers[userId]}  userId={userId}/>
+                    <span>{onlineUsers[userId]}</span>
                 </div>
             ))}
         </div>
