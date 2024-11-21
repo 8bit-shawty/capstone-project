@@ -10,6 +10,7 @@ function Chat() {
     const [onlineUsers, setOnlineUsers] = useState({})
     const [selectedUserId, setSelectedUserId] = useState(null)
     const [newMessage, setNewMessage] = useState('')
+    const [messages, setMessages] = useState([])
     const {id, username} = useContext(UserContext)
 
     useEffect(() => {
@@ -41,9 +42,14 @@ function Chat() {
         //     console.log(message)
         // })
         const messageData = JSON.parse(e.data)
-        // console.log(messageData)
+        console.log({e, messageData})
         if('online' in messageData){
             showOnlineUsers(messageData.online)
+        } else if ('text' in messageData){
+            // console.log({messageData})
+            //destructre the message data
+            // setMessages(previous => ([...previous, {sender: id, recipient: selectedUserId, text: messageData.text}]))
+            setMessages(previous => ([...previous, {...messageData}]))
         }
     }
 
@@ -53,11 +59,16 @@ function Chat() {
         //test 
         console.log('Sending message')
         ws.send(JSON.stringify({
-            message: {
                 recipient: selectedUserId,
                 text: newMessage
-            }
         }))
+        //clear the state then add to the messages array
+        setNewMessage('')
+        setMessages(previous => ([...previous, {
+                text: newMessage, 
+                sender: id,
+                recipient: selectedUserId,
+            }]))
     }
 
     // create this function inline
@@ -69,6 +80,31 @@ function Chat() {
     // const onlineUsersExcludingUs = onlineUsers.filter(user => user.username !=== username )
     const onlineUsersExcludingUs = {...onlineUsers}
     delete onlineUsersExcludingUs[id]
+
+
+    //issue rendering rest of messages**
+    // const messagesWithoutDupes = Array.from(
+    //     messages.reduce((map, message) => {
+    //         if (!map.has(message._id)) {
+    //             map.set(message._id, message);
+    //         }
+    //         return map;
+    //     }, new Map()).values()
+    // );
+
+    const filteredMessages = messages.filter(message => 
+        (message.sender === selectedUserId && message.recipient === id) || 
+        (message.sender === id && message.recipient === selectedUserId)
+    );
+    
+    const messagesWithoutDupes = Array.from(
+        filteredMessages.reduce((map, message) => {
+            if (!map.has(message._id)) {
+                map.set(message._id, message);
+            }
+            return map;
+        }, new Map()).values()
+    );
 
   return (
     <div className="flex h-screen">
@@ -100,6 +136,18 @@ function Chat() {
                         <div className="text-gray-700">
                             No Selected Person..
                         </div>
+                    </div>
+                )}
+                {selectedUserId && (
+                    <div>
+                        {messagesWithoutDupes.map((message, index) => (
+                            <div key={index} > 
+                                {/**Test to see if my id corresponds on different screens */}
+                                sender: {message.sender}<br/>
+                                myId: {id}<br />
+                                {message.text}
+                            </div>
+                        ))}
                     </div>
                 )}
             </div>
