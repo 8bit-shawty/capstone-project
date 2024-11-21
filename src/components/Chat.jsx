@@ -9,6 +9,7 @@ function Chat() {
     const [ws, setWs] = useState(null)
     const [onlineUsers, setOnlineUsers] = useState({})
     const [selectedUserId, setSelectedUserId] = useState(null)
+    const [newMessage, setNewMessage] = useState('')
     const {id, username} = useContext(UserContext)
 
     useEffect(() => {
@@ -44,6 +45,19 @@ function Chat() {
         if('online' in messageData){
             showOnlineUsers(messageData.online)
         }
+    }
+
+    function sendMessage(e) {
+        e.preventDefault()
+
+        //test 
+        console.log('Sending message')
+        ws.send(JSON.stringify({
+            message: {
+                recipient: selectedUserId,
+                text: newMessage
+            }
+        }))
     }
 
     // create this function inline
@@ -89,20 +103,25 @@ function Chat() {
                     </div>
                 )}
             </div>
-            <div className="flex gap-2">
-                <input 
-                type="text" 
-                placeholder="Message" 
-                className="bg-white border p-2 flex-grow rounded-sm" />
-                <button className="bg-blue-300 p-2 text-white rounded-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}       stroke="currentColor" className="size-5 stroke-1 hover:stroke-2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
-                    </svg>
-                </button>
-            </div>
+            {/**Hide the form if no user is selected  */}
+            {selectedUserId && (
+                <form className="flex gap-2" onSubmit={sendMessage}>
+                    <input 
+                    type="text" 
+                    value={newMessage}
+                    onChange={e => setNewMessage(e.target.value)}
+                    placeholder="Message" 
+                    className="bg-white border p-2 flex-grow rounded-sm" />
+                    <button type="submit" className="bg-blue-300 p-2 text-white rounded-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5}       stroke="currentColor" className="size-5 stroke-1 hover:stroke-2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+                        </svg>
+                    </button>
+                </form>
+            )}
         </div>
     </div>
-  )
+)
 }
 
 export default Chat
