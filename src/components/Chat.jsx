@@ -84,7 +84,7 @@ function Chat() {
             sender: id,
             recipient: selectedUserId,
             text: newMessage,
-            id: Date.now(),
+            _id: Date.now(),
             }]))
     }
 
@@ -101,6 +101,10 @@ function Chat() {
     useEffect(() => {
         if(selectedUserId){
             axios.get('/messages/' + selectedUserId)
+                .then(res => {
+                    console.log(res.data)
+                    setMessages(res.data)
+                })
         }
     }, [selectedUserId])
 
@@ -149,7 +153,7 @@ function Chat() {
     /**
      * This method is like _.union except that it accepts iteratee which is invoked for each element of each arrays to generate the criterion by which uniqueness is computed. Result values are chosen from the first array in which the value occurs. The iteratee is invoked with one argument:
      */
-    const messagesWithoutDupes = uniqBy(messages, 'id')
+    const messagesWithoutDupes = uniqBy(messages, '_id')
 
   return (
     <div className="flex h-screen">
@@ -168,7 +172,7 @@ function Chat() {
                     <div className="flex gap-2 pl-4 py-2 items-center">
                         {/* map through each users username */}
                         {/* {userId} */}
-                        <Avatar username={onlineUsers[userId]}  userId={userId}/>
+                        <Avatar username={onlineUsers[userId]}  userId={userId} online={true}/>
                         <span className="text-gray-800 font-medium">{onlineUsers[userId]}</span>
                     </div>
                 </div>
@@ -187,7 +191,7 @@ function Chat() {
                     <div className="relative h-full">
                         <div className="overflow-y-scroll absolute top-0 right-0 bottom-2 left-0">
                         {messagesWithoutDupes.map(message => (
-                            <div key={message} className={'' + (message.sender === id?'text-right':'text-left')}>
+                            <div key={message._id} className={'' + (message.sender === id?'text-right':'text-left')}>
                                 <div className={"inline-block p-2 my-2 rounded-md text-sm " + (message.sender === id ? 'bg-blue-500 text-white': 'bg-slate-800 text-white')}> 
                                     {/**Test to see if my id corresponds on different screens */}
                                     {message.text}<br/>
