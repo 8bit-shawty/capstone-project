@@ -3,6 +3,7 @@ import Avatar from "./Avatar.jsx"
 import Logo from "./Logo.jsx"
 import {UserContext} from '../UserContext.jsx'
 import {uniqBy} from 'lodash' 
+import axios from "axios"
 
 
 
@@ -17,11 +18,22 @@ function Chat() {
     //create a reference for the message box to auto scroll to the bottom when a new message appears
     const messageRef = useRef()
 
+    //closes the server everytime we make changes to it 
+    //we want to try to reconnect whenever we close
+    //create a function that connects to the websocket
     useEffect(() => {
+        connectToWebSocket();
+    }, [])
+
+    function connectToWebSocket () {
         const ws = new WebSocket('ws://localhost:3000')
         setWs(ws)
+
         ws.addEventListener('message', handleMessage)
-    }, [])
+        // ws.addEventListener('close', () => console.log('closed'))
+        ws.addEventListener('close', () => connectToWebSocket())
+
+    }
 
     function showOnlineUsers(usersArray) {
         // console.log(users)
@@ -84,6 +96,14 @@ function Chat() {
             div.scrollIntoView({behavior: 'smooth', block: 'end'})
         }
     }, [messages])
+
+    //grab all of the existing messages with the selected user from the db
+    useEffect(() => {
+        if(selectedUserId){
+            axios.get('/messages/' + selectedUserId)
+        }
+    }, [selectedUserId])
+
     // create this function inline
     // function selectContact(userId){
     //     setSelectedUserId(userId)
