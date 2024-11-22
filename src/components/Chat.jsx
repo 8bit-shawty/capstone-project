@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
 import Avatar from "./Avatar.jsx"
 import Logo from "./Logo.jsx"
 import {UserContext} from '../UserContext.jsx'
@@ -13,6 +13,9 @@ function Chat() {
     const [newMessage, setNewMessage] = useState('')
     const [messages, setMessages] = useState([])
     const {id, username} = useContext(UserContext)
+
+    //create a reference for the message box to auto scroll to the bottom when a new message appears
+    const messageRef = useRef()
 
     useEffect(() => {
         const ws = new WebSocket('ws://localhost:3000')
@@ -73,6 +76,14 @@ function Chat() {
             }]))
     }
 
+    useEffect(() => {
+        //add the message ref after we send the message
+        const div = messageRef.current;
+        console.dir(div)
+        if(div){
+            div.scrollIntoView({behavior: 'smooth', block: 'end'})
+        }
+    }, [messages])
     // create this function inline
     // function selectContact(userId){
     //     setSelectedUserId(userId)
@@ -153,17 +164,20 @@ function Chat() {
                     </div>
                 )}
                 {!!selectedUserId && (
-                    <div className="overflow-y-hidden">
+                    <div className="relative h-full">
+                        <div className="overflow-y-scroll absolute top-0 right-0 bottom-2 left-0">
                         {messagesWithoutDupes.map(message => (
                             <div key={message} className={'' + (message.sender === id?'text-right':'text-left')}>
                                 <div className={"inline-block p-2 my-2 rounded-md text-sm " + (message.sender === id ? 'bg-blue-500 text-white': 'bg-slate-800 text-white')}> 
                                     {/**Test to see if my id corresponds on different screens */}
-                                    sender: {message.sender}<br/>
-                                    myId: {id}<br />
-                                    {message.text}
+                                    {message.text}<br/>
+                                    sender: {message.sender}<br />
+                                    myId: {id}
                                 </div>
                             </div>
                         ))}
+                        <div ref={messageRef}></div>
+                        </div>
                     </div>
                 )}
             </div>
