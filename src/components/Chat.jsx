@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react"
 import Avatar from "./Avatar.jsx"
 import Logo from "./Logo.jsx"
 import {UserContext} from '../UserContext.jsx'
+import {uniqBy} from 'lodash' 
 
 
 
@@ -65,9 +66,9 @@ function Chat() {
         //clear the state then add to the messages array
         setNewMessage('')
         setMessages(previous => ([...previous, {
-                text: newMessage, 
-                sender: id,
-                recipient: selectedUserId,
+            sender: id,
+            recipient: selectedUserId,
+            text: newMessage, 
             }]))
     }
 
@@ -92,19 +93,31 @@ function Chat() {
     //     }, new Map()).values()
     // );
 
-    const filteredMessages = messages.filter(message => 
-        (message.sender === selectedUserId && message.recipient === id) || 
-        (message.sender === id && message.recipient === selectedUserId)
-    );
+    /**
+     * not receiving messages after the first one 
+     * lodash has a unique 
+     */
+    // console.log("Original Message", messages)
+
+    // const filteredMessages = messages.filter(message => 
+    //     (message.sender === selectedUserId && message.recipient === id) || 
+    //     (message.sender === id && message.recipient === selectedUserId)
+    // );
+    // console.log("filteredMessages",filteredMessages)
     
-    const messagesWithoutDupes = Array.from(
-        filteredMessages.reduce((map, message) => {
-            if (!map.has(message._id)) {
-                map.set(message._id, message);
-            }
-            return map;
-        }, new Map()).values()
-    );
+    // const messagesWithoutDupes = Array.from(
+    //     filteredMessages.reduce((map, message) => {
+    //         if (!map.has(message._id)) {
+    //             map.set(message._id, message);
+    //         }
+    //         return map;
+    //     }, new Map()).values()
+    // );
+    // console.log(messagesWithoutDupes)
+    /**
+     * This method is like _.union except that it accepts iteratee which is invoked for each element of each arrays to generate the criterion by which uniqueness is computed. Result values are chosen from the first array in which the value occurs. The iteratee is invoked with one argument:
+     */
+    const messagesWithoutDupes = uniqBy(messages, 'id')
 
   return (
     <div className="flex h-screen">
@@ -138,10 +151,10 @@ function Chat() {
                         </div>
                     </div>
                 )}
-                {selectedUserId && (
+                {!!selectedUserId && (
                     <div>
-                        {messagesWithoutDupes.map((message, index) => (
-                            <div key={index} > 
+                        {messagesWithoutDupes.map(message => (
+                            <div key={message}  className={""}> 
                                 {/**Test to see if my id corresponds on different screens */}
                                 sender: {message.sender}<br/>
                                 myId: {id}<br />
@@ -152,7 +165,7 @@ function Chat() {
                 )}
             </div>
             {/**Hide the form if no user is selected  */}
-            {selectedUserId && (
+            {!!selectedUserId && (
                 <form className="flex gap-2" onSubmit={sendMessage}>
                     <input 
                     type="text" 
