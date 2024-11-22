@@ -68,7 +68,8 @@ function Chat() {
         setMessages(previous => ([...previous, {
             sender: id,
             recipient: selectedUserId,
-            text: newMessage, 
+            text: newMessage,
+            id: Date.now(),
             }]))
     }
 
@@ -152,13 +153,15 @@ function Chat() {
                     </div>
                 )}
                 {!!selectedUserId && (
-                    <div>
+                    <div className="overflow-y-hidden">
                         {messagesWithoutDupes.map(message => (
-                            <div key={message}  className={""}> 
-                                {/**Test to see if my id corresponds on different screens */}
-                                sender: {message.sender}<br/>
-                                myId: {id}<br />
-                                {message.text}
+                            <div key={message} className={'' + (message.sender === id?'text-right':'text-left')}>
+                                <div className={"inline-block p-2 my-2 rounded-md text-sm " + (message.sender === id ? 'bg-blue-500 text-white': 'bg-slate-800 text-white')}> 
+                                    {/**Test to see if my id corresponds on different screens */}
+                                    sender: {message.sender}<br/>
+                                    myId: {id}<br />
+                                    {message.text}
+                                </div>
                             </div>
                         ))}
                     </div>
