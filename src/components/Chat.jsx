@@ -17,6 +17,8 @@ function Chat() {
     const {id, username, setId, setUsername} = useContext(UserContext)
     const [offlineUsers, setOfflineUsers] = useState({})
 
+    const [showSettings, setShowSettings] = useState(false)
+
     //create a reference for the message box to auto scroll to the bottom when a new message appears
     const messageRef = useRef()
 
@@ -219,9 +221,11 @@ function Chat() {
                 ))}
             </div>
             <div className="flex justify-around mb-2">
+                <span>{username}</span>
                 <div className="border-solid">
                     <button className="ring ring-blue-300 md:ring-blue-500 bg-slate-200 rounded px-6 cursor-pointer text-white">Settings</button>
                 </div>
+                
                 <div>
                     <button 
                     onClick={logout} 
