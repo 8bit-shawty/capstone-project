@@ -1,5 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react"
-import Avatar from "./Avatar.jsx"
+// import Avatar from "./Avatar.jsx"
+import User from "./User.jsx"
 import Logo from "./Logo.jsx"
 import {UserContext} from '../UserContext.jsx'
 import {uniqBy} from 'lodash' 
@@ -13,7 +14,8 @@ function Chat() {
     const [selectedUserId, setSelectedUserId] = useState(null)
     const [newMessage, setNewMessage] = useState('')
     const [messages, setMessages] = useState([])
-    const {id, username} = useContext(UserContext)
+    const {id, username, setId, setUsername} = useContext(UserContext)
+    const [offlineUsers, setOfflineUsers] = useState({})
 
     //create a reference for the message box to auto scroll to the bottom when a new message appears
     const messageRef = useRef()
@@ -62,10 +64,12 @@ function Chat() {
         if('online' in messageData){
             showOnlineUsers(messageData.online)
         } else if ('text' in messageData){
+            if(messageData.sender === selectedUserId){
+                setMessages(previous => ([...previous, {...messageData}]))
+            }
             // console.log({messageData})
             //destructre the message data
             // setMessages(previous => ([...previous, {sender: id, recipient: selectedUserId, text: messageData.text}]))
-            setMessages(previous => ([...previous, {...messageData}]))
         }
     }
 
@@ -108,6 +112,24 @@ function Chat() {
         }
     }, [selectedUserId])
 
+    useEffect(() => {
+        axios.get('/users')
+            .then(res => {
+                const offlineUsersArray = res.data
+                    //Exclude our own id so we do not pop up 
+                    .filter(user => user._id !== id)
+                    //Exclude users whos ids are not inside onlineUsers
+                    .filter(user => !Object.keys(onlineUsers).includes(user._id))
+                // console.log(offlineUsers)
+                const offlineUsers = {}
+                offlineUsersArray.forEach(user => {
+                    offlineUsers[user._id] = user
+                })
+                // console.log({offlineUsers, offlineUsersArray})
+                setOfflineUsers(offlineUsers)
+            })
+    }, [onlineUsers])
+
     // create this function inline
     // function selectContact(userId){
     //     setSelectedUserId(userId)
@@ -117,6 +139,18 @@ function Chat() {
     // const onlineUsersExcludingUs = onlineUsers.filter(user => user.username !=== username )
     const onlineUsersExcludingUs = {...onlineUsers}
     delete onlineUsersExcludingUs[id]
+
+    //Logout function
+    //reset the cookie to empty
+    //also set the id username to null
+    function logout() {
+        axios.post('/logout')
+            .then(() => {
+                setWs(null)
+                setId(null);
+                setUsername(null);
+            })
+    }
 
 
     //issue rendering rest of messages**
@@ -157,26 +191,45 @@ function Chat() {
 
   return (
     <div className="flex h-screen">
-        <div className="bg-white w-1/3">
-            <Logo/>
-            {/* {username} we have our context now we do not want to display ourselves in the users list*/} 
-            {Object.keys(onlineUsersExcludingUs).map((userId, index) => (
-                //might need to adjust the key to userId
-                <div key={index} 
-                onClick={() => setSelectedUserId(userId)}
-                className={`border-b border-gray-300 flex items-center gap-1 cursor-pointer ` + (userId === selectedUserId ? 'bg-gray-300' : '')}
-                >
-                    {userId === selectedUserId && (
-                        <div className="w-1 bg-blue-600 h-12"></div>
-                    )}
-                    <div className="flex gap-2 pl-4 py-2 items-center">
-                        {/* map through each users username */}
-                        {/* {userId} */}
-                        <Avatar username={onlineUsers[userId]}  userId={userId} online={true}/>
-                        <span className="text-gray-800 font-medium">{onlineUsers[userId]}</span>
-                    </div>
+        <div className="bg-white w-1/3 flex flex-col">
+            <div className="flex-grow">
+                <Logo/>
+                {/* {username} we have our context now we do not want to display ourselves in the users list*/} 
+                {Object.keys(onlineUsersExcludingUs).map(userId => (
+                    //might need to adjust the key to userId
+                    <User 
+                    key={userId}
+                    id={userId}
+                    username={onlineUsersExcludingUs[userId]}
+                    selected={userId === selectedUserId}
+                    onClick={() => setSelectedUserId(userId)}
+                    online={true}
+                    />
+                ))}
+                {Object.keys(offlineUsers).map(userId => (
+                    //might need to adjust the key to userId
+                    <User 
+                    key={userId}
+                    id={userId}
+                    username={offlineUsers[userId].username}
+                    selected={userId === selectedUserId}
+                    onClick={() => setSelectedUserId(userId)}
+                    online={false}
+                    />
+                ))}
+            </div>
+            <div className="flex justify-around mb-2">
+                <div className="border-solid">
+                    <button className="ring ring-blue-300 md:ring-blue-500 bg-slate-200 rounded px-6 cursor-pointer text-white">Settings</button>
                 </div>
-            ))}
+                <div>
+                    <button 
+                    onClick={logout} 
+                    className="border bg-blue-500 rounded px-6 cursor-pointer text-white">
+                        Logout
+                    </button>
+                </div>
+            </div>
         </div>
         <div className="flex flex-col bg-blue-400 w-2/3 p-3">
             <div className="flex-grow">
