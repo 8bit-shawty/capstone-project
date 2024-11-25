@@ -9,7 +9,11 @@ function Routes() {
     const {username, id} = useContext(UserContext)
 
     if(username && id){
-        return <Dashboard/>
+
+        return(
+            
+            <Dashboard/>
+        )  
     }
   return (
     <RegisterAndLoginForm/>

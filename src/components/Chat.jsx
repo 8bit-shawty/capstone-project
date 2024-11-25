@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react"
 // import Avatar from "./Avatar.jsx"
 import User from "./User.jsx"
-import Logo from "./Logo.jsx"
+// import Logo from "./Logo.jsx"
 import {UserContext} from '../UserContext.jsx'
 import {uniqBy} from 'lodash' 
 import axios from "axios"
@@ -15,7 +15,7 @@ function Chat() {
     const [selectedUserId, setSelectedUserId] = useState(null)
     const [newMessage, setNewMessage] = useState('')
     const [messages, setMessages] = useState([])
-    const {id, username, setId, setUsername} = useContext(UserContext)
+    const {id, username} = useContext(UserContext)
     const [offlineUsers, setOfflineUsers] = useState({})
 
     const [showSettings, setShowSettings] = useState(false)
@@ -30,14 +30,22 @@ function Chat() {
         connectToWebSocket();
     }, [])
 
-    function connectToWebSocket () {
-        const ws = new WebSocket('ws://localhost:3000')
-        setWs(ws)
-
-        ws.addEventListener('message', handleMessage)
-        // ws.addEventListener('close', () => console.log('closed'))
-        ws.addEventListener('close', () => connectToWebSocket())
-
+    function connectToWebSocket() {
+        const ws = new WebSocket("ws://localhost:3000");
+        setWs(ws);
+    
+        ws.addEventListener("open", () => console.log("WebSocket connected")); // Log successful connection
+    
+        ws.addEventListener("message", handleMessage);
+    
+        ws.addEventListener("close", () => {
+            console.log("WebSocket closed, reconnecting...");
+            setTimeout(connectToWebSocket, 3000); // Attempt reconnection
+        });
+    
+        ws.addEventListener("error", (err) => {
+            console.error("WebSocket error:", err);
+        });
     }
 
     function showOnlineUsers(usersArray) {
@@ -67,8 +75,8 @@ function Chat() {
         if('online' in messageData){
             showOnlineUsers(messageData.online)
         } else if ('text' in messageData){
-            if(messageData.sender === selectedUserId){
-                setMessages(previous => ([...previous, {...messageData}]))
+            if(messageData.sender === selectedUserId || messageData.recipient === id){
+                setMessages((prev) => [...prev, messageData]); // Add new message
             }
             // console.log({messageData})
             //destructre the message data
@@ -78,6 +86,7 @@ function Chat() {
 
     function sendMessage(e) {
         e.preventDefault()
+        if (!newMessage.trim()) return; // Prevent sending empty messages
 
         //test 
         console.log('Sending message')
@@ -86,13 +95,13 @@ function Chat() {
                 text: newMessage
         }))
         //clear the state then add to the messages array
-        setNewMessage('')
         setMessages(previous => ([...previous, {
             sender: id,
             recipient: selectedUserId,
             text: newMessage,
             _id: Date.now(),
-            }]))
+        }]))
+        setNewMessage('')
     }
 
     useEffect(() => {
@@ -143,17 +152,7 @@ function Chat() {
     const onlineUsersExcludingUs = {...onlineUsers}
     delete onlineUsersExcludingUs[id]
 
-    //Logout function
-    //reset the cookie to empty
-    //also set the id username to null
-    function logout() {
-        axios.post('/logout')
-            .then(() => {
-                setWs(null)
-                setId(null);
-                setUsername(null);
-            })
-    }
+
 
 
     //issue rendering rest of messages**
@@ -193,10 +192,10 @@ function Chat() {
     const messagesWithoutDupes = uniqBy(messages, '_id')
 
   return (
-    <div className="flex h-screen">
-        <div className="bg-white w-1/3 flex flex-col">
-            <div className="flex-grow">
-                <Logo/>
+    <div className="flex h-full">
+        <div className="bg-white w-1/3 flex flex-col overflow-hidden">
+            <div className="flex-grow overflow-auto">
+                <h2 className="text-2xl mb-2">chat.</h2>
                 {/* {username} we have our context now we do not want to display ourselves in the users list*/} 
                 {Object.keys(onlineUsersExcludingUs).map(userId => (
                     //might need to adjust the key to userId
@@ -221,32 +220,15 @@ function Chat() {
                     />
                 ))}
             </div>
-            <div className="flex justify-around mb-2">
-                <span>{username}</span>
-                <div className="border-solid">
-                    <button 
-                    onClick={() => setShowSettings(true)}
-                    className="ring ring-blue-300 md:ring-blue-500 bg-slate-200 rounded px-6 cursor-pointer text-white">
-                        Settings
-                    </button>
-                </div>
-                
-                <div>
-                    <button 
-                    onClick={logout} 
-                    className="border bg-blue-500 rounded px-6 cursor-pointer text-white">
-                        Logout
-                    </button>
-                </div>
-            </div>
+            
         </div>
         {showSettings && (
             <div className="absolute inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
                 <Settings onClose={() => setShowSettings(false)} />
             </div>
         )}
-        <div className="flex flex-col bg-blue-400 w-2/3 p-3">
-            <div className="flex-grow">
+        <div className="flex flex-col bg-blue-400 w-2/3 p-3 overflow-hidden">
+            <div className="flex-grow relative">
                 {!selectedUserId && (
                     <div className="flex h-full items-center justify-center">
                         <div className="text-gray-700">
@@ -255,8 +237,8 @@ function Chat() {
                     </div>
                 )}
                 {!!selectedUserId && (
-                    <div className="relative h-full">
-                        <div className="overflow-y-scroll absolute top-0 right-0 bottom-2 left-0">
+                    <div className="relative h-full overflow-hidden">
+                        <div className="overflow-y-auto absolute inset-0 p-2">
                         {messagesWithoutDupes.map(message => (
                             <div key={message._id} className={'' + (message.sender === id?'text-right':'text-left')}>
                                 <div className={"inline-block p-2 my-2 rounded-md text-sm " + (message.sender === id ? 'bg-blue-500 text-white': 'bg-slate-800 text-white')}> 
