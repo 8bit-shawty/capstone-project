@@ -2,7 +2,7 @@
 
 function Card({title, description, image, publishedAt, url}) {
   return (
-    <div className="p-4 bg-white shadow-md rounded-lg max-w-md">
+    <div className="p-4 bg-white shadow-md rounded-lg max-w-full">
             {image && (
                 <a href={url} target="_blank" rel="noopener noreferrer">
                     <img
@@ -17,16 +17,18 @@ function Card({title, description, image, publishedAt, url}) {
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-lg font-bold text-blue-700 hover:underline"
+                    className="text-lg font-bold text-blue-700 hover:underline h-12 overflow-hidden"
                 >
                     {title}
                 </a>
-                <p className="mt-2 text-sm text-gray-600">{description}</p>
+                <p className="mt-2 text-sm text-gray-600 line-clamp-3">
+                    {description}
+                </p>
                 <p className="mt-1 text-xs text-gray-400">
                     Published: {new Date(publishedAt).toLocaleString()}
                 </p>
             </div>
-        </div>
+    </div>
   )
 }
 
