@@ -5,6 +5,7 @@ import Logo from "./Logo.jsx"
 import {UserContext} from '../UserContext.jsx'
 import {uniqBy} from 'lodash' 
 import axios from "axios"
+import Settings from "./Settings.jsx"
 
 
 
@@ -223,7 +224,11 @@ function Chat() {
             <div className="flex justify-around mb-2">
                 <span>{username}</span>
                 <div className="border-solid">
-                    <button className="ring ring-blue-300 md:ring-blue-500 bg-slate-200 rounded px-6 cursor-pointer text-white">Settings</button>
+                    <button 
+                    onClick={() => setShowSettings(true)}
+                    className="ring ring-blue-300 md:ring-blue-500 bg-slate-200 rounded px-6 cursor-pointer text-white">
+                        Settings
+                    </button>
                 </div>
                 
                 <div>
@@ -235,6 +240,11 @@ function Chat() {
                 </div>
             </div>
         </div>
+        {showSettings && (
+            <div className="absolute inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
+                <Settings onClose={() => setShowSettings(false)} />
+            </div>
+        )}
         <div className="flex flex-col bg-blue-400 w-2/3 p-3">
             <div className="flex-grow">
                 {!selectedUserId && (

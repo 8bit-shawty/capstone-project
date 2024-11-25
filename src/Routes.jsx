@@ -6,7 +6,7 @@ import Chat from "./components/Chat.jsx"
 function Routes() {
     const {username, id} = useContext(UserContext)
 
-    if(username){
+    if(username && id){
         return <Chat/>
     }
   return (
