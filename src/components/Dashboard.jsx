@@ -67,7 +67,7 @@ function Dashboard() {
 
                     {/* Chat Section (Collapsible) */}
                     {showChat && (
-                        <div className="w-full md:w-1/3 bg-gray-100 border-l border-gray-300">
+                        <div className="w-full  bg-gray-100 border-l border-gray-300">
                             <Chat />
                         </div>
                     )}
