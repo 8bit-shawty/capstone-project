@@ -1,4 +1,4 @@
-import { useContext, useState } from "react"
+import { useContext, useState, useEffect } from "react"
 import axios from 'axios'
 import { UserContext } from "../UserContext.jsx"
 
@@ -10,6 +10,42 @@ function RegisterAndLoginForm() {
     const [isloginOrRegister, setIsLoginOrRegister] = useState('register')
 
     const{setUsername:setLoggedInUsername, setId} = useContext(UserContext)
+
+    const [dynamicText, setDynamicText] = useState(""); // Dynamic text for the typer
+    const words = ["news", "messaging", "life"]; // Words to cycle through
+    const typingSpeed = 150; // Speed of typing
+    const pauseBetweenWords = 1000; // Pause before typing next word
+
+    useEffect(() => {
+        let wordIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+
+        function typeWords() {
+            const currentWord = words[wordIndex];
+
+            if (isDeleting) {
+                setDynamicText(currentWord.slice(0, charIndex--));
+                if (charIndex < 0) {
+                    isDeleting = false;
+                    wordIndex = (wordIndex + 1) % words.length; // Move to next word
+                    setTimeout(typeWords, typingSpeed); // Pause before starting next word
+                    return;
+                }
+            } else {
+                setDynamicText(currentWord.slice(0, charIndex++));
+                if (charIndex > currentWord.length) {
+                    isDeleting = true;
+                    setTimeout(typeWords, pauseBetweenWords); // Pause after completing word
+                    return;
+                }
+            }
+
+            setTimeout(typeWords, typingSpeed);
+        }
+
+        typeWords(); // Start the typing effect
+    }, []); // Run once on component mount
 
     async function handleSubmit(e){
         e.preventDefault()
@@ -23,7 +59,13 @@ function RegisterAndLoginForm() {
     }
   return (
   <>
-    <div className="bg-blue-400 h-screen flex items-center">
+    <div className="bg-blue-400 h-screen flex flex-col items-center justify-center">
+        {/**Auto typer */}
+
+        <div className="text-4xl font-bold text-white mb-6">
+            <span>propr. </span> <span>{dynamicText}</span>
+        </div>
+
         <form className="w-64 mx-auto mb-12" onSubmit={handleSubmit}>
             <input 
             value={username} 

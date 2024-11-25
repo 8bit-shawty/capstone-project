@@ -1,5 +1,5 @@
-# Project Name
-> propr. News and Chat App Frontend
+# propr.
+> News and Chat App Frontend
 > Live demo [_here_](https://capstone-project-max-fregoso.netlify.app/). <!-- If you have the project hosted somewhere, include the link here. -->
 
 ## Table of Contents

@@ -1,13 +1,15 @@
 import axios from "axios"
 import { UserContext } from "../UserContext"
 import { useContext, useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 function Settings({onClose, setUsername}) {
-    const {id} = useContext(UserContext)
+    const {id, setUserContext} = useContext(UserContext)
     const [newUsername, setNewUsername] = useState('');
     const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate()
 
     // Update username function
     const updateUsername = async () => {
@@ -35,12 +37,26 @@ function Settings({onClose, setUsername}) {
     const deleteAccount = async () => {
         setLoading(true); // Show loading
         try {
-            await axios.delete(`/delete/${id}`);
-            window.location.href = "/signup"; // Redirect after account deletion
+            console.log(`Attempting to delete account with ID: ${id}`); // Debug log
+
+            const response = await axios.delete(`/delete/${id}`);
+            console.log('Delete response:', response.data); // Debug log
+
+            if (response.status === 200) {
+                console.log('Account deleted successfully, redirecting to login'); // Debug log
+
+                // Clear user context and navigate
+                setUserContext(null);
+                navigate('/login'); // Redirect to login page
+            } else {
+                console.error('Unexpected response:', response); // Debug log
+                setError(response.data.error || 'Failed to delete account');
+            }
         } catch (err) {
-            setError("Failed to delete account."); // Show error message
+            console.error('Error during account deletion:', err); // Debug log
+            setError('Failed to delete account. Please try again later.');
         } finally {
-            setLoading(false); // Hide loading
+            setLoading(false);
         }
     };
 

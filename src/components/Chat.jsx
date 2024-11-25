@@ -244,8 +244,8 @@ function Chat() {
                                 <div className={"inline-block p-2 my-2 rounded-md text-sm " + (message.sender === id ? 'bg-blue-500 text-white': 'bg-slate-800 text-white')}> 
                                     {/**Test to see if my id corresponds on different screens */}
                                     {message.text}<br/>
-                                    sender: {message.sender}<br />
-                                    myId: {id}
+                                    {/* sender: {message.sender}<br /> */}
+                                    {/* myId: {id} */}
                                 </div>
                             </div>
                         ))}
